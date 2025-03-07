@@ -17,7 +17,7 @@ const Login = () => {
   const handleLogin = async () => {
     setLoading(true);
     try {
-      const response = await axios.post("http://localhost:8080/api/auth/login", formData);
+      const response = await axios.post("https://lms-backend-cntm.onrender.com/api/auth/login", formData);
       const { token } = response.data;
       localStorage.setItem('token', token);
       setMessage(response.data.message);

@@ -43,7 +43,7 @@ const Signup = () => {
     }
   
     try {
-      const response = await axios.post("http://localhost:8080/api/auth/register", formData, {
+      const response = await axios.post("https://lms-backend-cntm.onrender.com/api/auth/register", formData, {
         headers: { "Content-Type": "multipart/form-data" },
       });
   

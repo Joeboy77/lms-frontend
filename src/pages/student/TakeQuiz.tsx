@@ -95,7 +95,7 @@ const TakeQuiz = () => {
         const fetchQuiz = async () => {
             try {
                 const token = localStorage.getItem("token");
-                const response = await axios.get(`http://localhost:8080/api/student/quiz/${id}`, {
+                const response = await axios.get(`https://lms-backend-cntm.onrender.com/api/student/quiz/${id}`, {
                     headers: { Authorization: `Bearer ${token}` },
                 });
 
@@ -106,7 +106,7 @@ const TakeQuiz = () => {
 
                 // Check if student has already taken this quiz
                 const resultResponse = await axios.get(
-                    `http://localhost:8080/api/student/quiz-result/${id}`,
+                    `https://lms-backend-cntm.onrender.com/api/student/quiz-result/${id}`,
                     { headers: { Authorization: `Bearer ${token}` } }
                 );
 
@@ -149,7 +149,7 @@ const TakeQuiz = () => {
             setLoading(true);
             const token = localStorage.getItem("token");
             const response = await axios.post(
-                `http://localhost:8080/api/student/submit-quiz/${id}`,
+                `https://lms-backend-cntm.onrender.com/api/student/submit-quiz/${id}`,
                 { answers },
                 { headers: { Authorization: `Bearer ${token}` }}
             );

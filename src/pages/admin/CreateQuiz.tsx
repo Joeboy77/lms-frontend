@@ -65,7 +65,7 @@ const CreateQuiz = () => {
       console.log("Token:", token);
 
       const response = await axios.post(
-        "http://localhost:8080/api/admin/create-quiz",
+        "https://lms-backend-cntm.onrender.com/api/admin/create-quiz",
         {
           ...data,
           questions,

@@ -36,7 +36,7 @@ const UploadAssignment = () => {
       const token = localStorage.getItem("token");
   
       const response = await axios.post(
-        "http://localhost:8080/api/admin/upload-assignment",
+        "https://lms-backend-cntm.onrender.com/api/admin/upload-assignment",
         form,
         {
           headers: {

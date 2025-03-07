@@ -87,8 +87,8 @@ const Dashboard = () => {
       const headers = { Authorization: `Bearer ${token}` };
 
       const [studentsRes, statsRes] = await Promise.all([
-        axios.get<Student[]>("http://localhost:8080/api/admin/students", { headers }),
-        axios.get<SystemStats>("http://localhost:8080/api/admin/system-stats", { headers }),
+        axios.get<Student[]>("https://lms-backend-cntm.onrender.com/api/admin/students", { headers }),
+        axios.get<SystemStats>("https://lms-backend-cntm.onrender.com/api/admin/system-stats", { headers }),
       ]);
 
       setStudents(studentsRes.data);
@@ -102,7 +102,7 @@ const Dashboard = () => {
     try {
       const token = localStorage.getItem("token");
       const response = await axios.get<StudentDetails>(
-        `http://localhost:8080/api/admin/students/${studentId}`,
+        `https://lms-backend-cntm.onrender.com/api/admin/students/${studentId}`,
         {
           headers: { Authorization: `Bearer ${token}` },
         }

@@ -37,7 +37,7 @@ const StudentQuizzes = () => {
     const fetchQuizzes = async () => {
       try {
         const token = localStorage.getItem("token");
-        const response = await axios.get("http://localhost:8080/api/student/quizzes", {
+        const response = await axios.get("https://lms-backend-cntm.onrender.com/api/student/quizzes", {
           headers: { Authorization: `Bearer ${token}` },
         });
 

@@ -42,7 +42,7 @@ const StudentDashboard = () => {
       try {
         const token = localStorage.getItem('token');
         const response = await axios.get<DashboardData>(
-          'http://localhost:8080/api/student/dashboard',
+          'https://lms-backend-cntm.onrender.com/api/student/dashboard',
           {
             headers: { Authorization: `Bearer ${token}` },
           }
