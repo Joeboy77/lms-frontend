@@ -17,6 +17,7 @@ interface StudentProfile {
   last_name: string;
   email: string;
   username: string;
+  profile_picture: string | null;
 }
 
 const StudentProfile = () => {
@@ -70,6 +71,34 @@ const StudentProfile = () => {
       setMessage('Failed to update profile');
     } finally {
       setSaving(false);
+    }
+  };
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+      const formData = new FormData();
+      formData.append('profile_picture', e.target.files[0]);
+      
+      const token = localStorage.getItem('token');
+      axios.put(
+        'https://lms-backend-cntm.onrender.com/api/student/profile-picture',
+        formData,
+        { 
+          headers: { 
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'multipart/form-data'
+          } 
+        }
+      )
+      .then(response => {
+        setProfile(prev => prev ? {...prev, profile_picture: response.data.profile_picture} : null);
+        setSuccess(true);
+        setMessage('Profile picture updated successfully!');
+      })
+      .catch(error => {
+        setSuccess(false);
+        setMessage('Failed to update profile picture');
+      });
     }
   };
 

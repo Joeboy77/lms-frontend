@@ -20,6 +20,13 @@ import {
 } from "@mui/icons-material";
 import { jwtDecode } from "jwt-decode";
 import { useNavigate } from "react-router-dom";
+import axios from "axios";
+
+interface UserProfile {
+  profile_picture?: string;
+  first_name: string;
+  last_name: string;
+}
 
 const Navbar = ({ sidebarWidth = 240, collapsed = false }) => {
   const theme = useTheme();
@@ -29,12 +36,12 @@ const Navbar = ({ sidebarWidth = 240, collapsed = false }) => {
   const [userName, setUserName] = useState<string | null>("User");
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const [mobileMoreAnchorEl, setMobileMoreAnchorEl] = useState<null | HTMLElement>(null);
+  const [profile, setProfile] = useState<UserProfile | null>(null);
 
   const isMenuOpen = Boolean(anchorEl);
   const isMobileMenuOpen = Boolean(mobileMoreAnchorEl);
 
   useEffect(() => {
-    // Retrieve token from localStorage
     const token = localStorage.getItem("token");
     if (token) {
       try {
@@ -43,11 +50,28 @@ const Navbar = ({ sidebarWidth = 240, collapsed = false }) => {
         if (decoded.name) {
           setUserName(decoded.name);
         }
+
+        // Fetch profile data if user is a student
+        if (decoded.role === 'student') {
+          fetchProfile(token);
+        }
       } catch (error) {
         console.error("Error decoding token:", error);
       }
     }
   }, []);
+
+  const fetchProfile = async (token: string) => {
+    try {
+      const response = await axios.get(
+        'https://lms-backend-cntm.onrender.com/api/student/profile',
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      setProfile(response.data);
+    } catch (error) {
+      console.error('Error fetching profile:', error);
+    }
+  };
 
   const handleProfileMenuOpen = (event: React.MouseEvent<HTMLElement>) => {
     setAnchorEl(event.currentTarget);
@@ -172,10 +196,12 @@ const Navbar = ({ sidebarWidth = 240, collapsed = false }) => {
                 }}
               >
                 <Avatar
+                  src={userRole === 'student' ? profile?.profile_picture : undefined}
                   sx={{
                     bgcolor: userRole === 'admin' ? '#4fc3f7' : '#81c784',
                     width: 40,
-                    height: 40
+                    height: 40,
+                    cursor: userRole === 'student' ? 'pointer' : 'default'
                   }}
                 >
                   {userRole === 'admin' ? 'A' : userName?.charAt(0) || 'U'}
