@@ -74,31 +74,37 @@ const StudentProfile = () => {
     }
   };
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
       const formData = new FormData();
       formData.append('profile_picture', e.target.files[0]);
       
-      const token = localStorage.getItem('token');
-      axios.put(
-        'https://lms-backend-cntm.onrender.com/api/student/profile-picture',
-        formData,
-        { 
-          headers: { 
-            Authorization: `Bearer ${token}`,
-            'Content-Type': 'multipart/form-data'
-          } 
-        }
-      )
-      .then(response => {
-        setProfile(prev => prev ? {...prev, profile_picture: response.data.profile_picture} : null);
+      try {
+        const token = localStorage.getItem('token');
+        const response = await axios.put(
+          'https://lms-backend-cntm.onrender.com/api/student/profile-picture',
+          formData,
+          { 
+            headers: { 
+              Authorization: `Bearer ${token}`,
+              'Content-Type': 'multipart/form-data'
+            } 
+          }
+        );
+
+        // Update the profile state with the new picture URL
+        setProfile(prev => prev ? {
+          ...prev,
+          profile_picture: response.data.profile_picture
+        } : null);
+        
         setSuccess(true);
         setMessage('Profile picture updated successfully!');
-      })
-      .catch(error => {
+      } catch (error) {
         setSuccess(false);
         setMessage('Failed to update profile picture');
-      });
+        console.error('Error updating profile picture:', error);
+      }
     }
   };
 
