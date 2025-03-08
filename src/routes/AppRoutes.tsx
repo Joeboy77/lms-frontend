@@ -13,6 +13,7 @@ import StudentQuizzes from "../pages/student/StudentQuizzes";
 import { jwtDecode } from "jwt-decode";
 import { useEffect, useState } from "react";
 import TakeQuiz from "../pages/student/TakeQuiz";
+import StudentProfile from "../pages/student/StudentProfile";
 
 const AppRoutes = () => {
   const [userRole, setUserRole] = useState<string | null>(null);
@@ -73,6 +74,8 @@ const AppRoutes = () => {
                        <Route path="test-quizzes" element={<StudentQuizzes />} />
                       <Route path="assignments" element={<StudentAssignments />} /> 
                      <Route path="take-quiz/:id" element={<TakeQuiz />} />
+                     <Route path="profile" element={<StudentProfile />} />
+
                     </Routes>
                   </Box>
                 </Box>
