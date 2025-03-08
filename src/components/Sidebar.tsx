@@ -13,7 +13,9 @@ import {
   useTheme,
   AppBar,
   Toolbar,
-  Container
+  Container,
+  Badge,
+  Tooltip
 } from "@mui/material";
 import { 
   Dashboard, 
@@ -22,16 +24,18 @@ import {
   Menu as MenuIcon, 
   Logout,
   ChevronLeft,
-  ChevronRight
+  ChevronRight,
+  Notifications,
+  AccountCircle
 } from "@mui/icons-material";
 import { NavLink, useNavigate, useLocation } from "react-router-dom";
 import { jwtDecode } from "jwt-decode";
 
 // Define the sidebar width values
 const EXPANDED_WIDTH = 240;
-const COLLAPSED_WIDTH = 65;
+const COLLAPSED_WIDTH = 68;
 
-const Sidebar = () => {
+const Sidebar = ({ children }: { children: React.ReactNode }) => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -52,6 +56,13 @@ const Sidebar = () => {
       }
     }
   }, []);
+
+  // Close sidebar drawer when route changes on mobile
+  useEffect(() => {
+    if (isMobile && mobileOpen) {
+      setMobileOpen(false);
+    }
+  }, [location.pathname, isMobile]);
 
   const handleLogout = () => {
     localStorage.removeItem("token");
@@ -91,7 +102,7 @@ const Sidebar = () => {
         height: '100%', 
         display: 'flex', 
         flexDirection: 'column',
-        background: 'linear-gradient(to bottom, #3a4a5c, #2c3e50)',
+        background: 'linear-gradient(to bottom, #1a2c3b, #0c1824)',
         color: '#fff',
         overflow: 'hidden'
       }}
@@ -109,7 +120,11 @@ const Sidebar = () => {
             variant="h6" 
             sx={{ 
               fontWeight: 'bold',
-              color: '#fff'
+              color: '#fff',
+              fontSize: '1.1rem',
+              overflow: 'hidden',
+              textOverflow: 'ellipsis',
+              whiteSpace: 'nowrap'
             }}
           >
             {userRole === 'admin' ? 'Admin Panel' : 'Student Portal'}
@@ -128,42 +143,62 @@ const Sidebar = () => {
       
       <Divider sx={{ backgroundColor: 'rgba(255,255,255,0.1)' }} />
       
-      <List sx={{ pt: 1, overflowY: 'auto' }}>
+      <List sx={{ pt: 1, overflowY: 'auto', flexGrow: 1 }}>
         {menuItems.map((item) => {
           const isActive = location.pathname === item.path;
           
           return (
-            <ListItem key={item.text} disablePadding>
-              <NavLink
-                to={item.path}
-                style={{
-                  display: "flex",
-                  width: "100%",
-                  padding: collapsed ? "16px 0" : "12px 16px",
-                  textDecoration: "none",
-                  color: "#fff",
-                  alignItems: "center",
-                  justifyContent: collapsed ? "center" : "flex-start",
-                  borderLeft: isActive ? "4px solid #4fc3f7" : "4px solid transparent",
-                  backgroundColor: isActive ? "rgba(255,255,255,0.1)" : "transparent",
-                }}
-                onClick={() => isMobile && setMobileOpen(false)}
+            <ListItem key={item.text} disablePadding sx={{ mb: 0.5 }}>
+              <Tooltip 
+                title={collapsed ? item.text : ""}
+                placement="right"
+                arrow
+                disableHoverListener={!collapsed}
               >
-                <ListItemIcon sx={{ 
-                  color: isActive ? "#4fc3f7" : "#fff",
-                  minWidth: collapsed ? 0 : 40,
-                  marginRight: collapsed ? 0 : 2
-                }}>
-                  {item.icon}
-                </ListItemIcon>
-                {!collapsed && <ListItemText 
-                  primary={item.text} 
-                  primaryTypographyProps={{ 
-                    fontSize: '0.95rem',
-                    fontWeight: isActive ? 'bold' : 'normal'
-                  }} 
-                />}
-              </NavLink>
+                <Box
+                  component={NavLink}
+                  to={item.path}
+                  sx={{
+                    display: "flex",
+                    width: "100%",
+                    padding: collapsed ? "12px 0" : "10px 16px",
+                    textDecoration: "none",
+                    color: "#fff",
+                    alignItems: "center",
+                    justifyContent: collapsed ? "center" : "flex-start",
+                    borderLeft: isActive ? "4px solid #4fc3f7" : "4px solid transparent",
+                    backgroundColor: isActive ? "rgba(255,255,255,0.08)" : "transparent",
+                    transition: "all 0.2s ease-in-out",
+                    borderRadius: "0 4px 4px 0",
+                    position: "relative",
+                    overflow: "hidden",
+                    "&:hover": {
+                      backgroundColor: "rgba(255,255,255,0.05)",
+                    }
+                  }}
+                >
+                  <ListItemIcon sx={{ 
+                    color: isActive ? "#4fc3f7" : "rgba(255,255,255,0.7)",
+                    minWidth: collapsed ? 0 : 40,
+                    marginRight: collapsed ? 0 : 2,
+                    display: 'flex',
+                    justifyContent: 'center'
+                  }}>
+                    {item.icon}
+                  </ListItemIcon>
+                  {!collapsed && <ListItemText 
+                    primary={item.text} 
+                    primaryTypographyProps={{ 
+                      fontSize: '0.95rem',
+                      fontWeight: isActive ? 600 : 400,
+                      color: isActive ? "#fff" : "rgba(255,255,255,0.85)",
+                      overflow: 'hidden',
+                      textOverflow: 'ellipsis',
+                      whiteSpace: 'nowrap'
+                    }} 
+                  />}
+                </Box>
+              </Tooltip>
             </ListItem>
           );
         })}
@@ -172,53 +207,64 @@ const Sidebar = () => {
       <Divider sx={{ backgroundColor: 'rgba(255,255,255,0.1)', mt: 'auto' }} />
       
       {/* Logout button at bottom */}
-      <Box sx={{ mb: 2 }}>
-        <ListItem
-          component="div"
-          sx={{
-            padding: collapsed ? "16px 0" : "12px 16px",
-            justifyContent: collapsed ? "center" : "flex-start",
-            '&:hover': {
-              backgroundColor: 'rgba(255, 255, 255, 0.1)',
-            },
-            cursor: 'pointer'
-          }}
-          onClick={handleLogout}
+      <Box sx={{ mb: 1, mt: 1 }}>
+        <Tooltip 
+          title={collapsed ? "Logout" : ""}
+          placement="right"
+          arrow
+          disableHoverListener={!collapsed}
         >
-          <ListItemIcon sx={{ 
-            color: '#ff5252', 
-            minWidth: collapsed ? 0 : 40,
-            marginRight: collapsed ? 0 : 2
-          }}>
-            <Logout />
-          </ListItemIcon>
-          {!collapsed && <ListItemText 
-            primary="Logout" 
-            primaryTypographyProps={{ 
-              color: '#ff5252',
-              fontSize: '0.95rem'
-            }} 
-          />}
-        </ListItem>
+          <ListItem
+            component="div"
+            sx={{
+              padding: collapsed ? "12px 0" : "10px 16px",
+              justifyContent: collapsed ? "center" : "flex-start",
+              '&:hover': {
+                backgroundColor: 'rgba(255, 255, 255, 0.05)',
+              },
+              cursor: 'pointer',
+              borderRadius: "0 4px 4px 0",
+            }}
+            onClick={handleLogout}
+          >
+            <ListItemIcon sx={{ 
+              color: '#ff5252', 
+              minWidth: collapsed ? 0 : 40,
+              marginRight: collapsed ? 0 : 2,
+              display: 'flex',
+              justifyContent: 'center'
+            }}>
+              <Logout />
+            </ListItemIcon>
+            {!collapsed && <ListItemText 
+              primary="Logout" 
+              primaryTypographyProps={{ 
+                color: '#ff5252',
+                fontSize: '0.95rem',
+                fontWeight: 500
+              }} 
+            />}
+          </ListItem>
+        </Tooltip>
       </Box>
     </Box>
   );
 
   return (
-    <>
+    <Box sx={{ display: 'flex' }}>
       {/* Fixed Top AppBar - Always visible on all devices */}
       <AppBar 
         position="fixed" 
-        elevation={0}
+        elevation={1}
         sx={{ 
           zIndex: theme.zIndex.drawer + 2,
           backgroundColor: '#1a2c3b',
-          borderBottom: '1px solid rgba(255,255,255,0.1)'
+          boxShadow: '0 1px 8px rgba(0,0,0,0.15)'
         }}
       >
-        <Toolbar sx={{ justifyContent: 'space-between' }}>
+        <Toolbar sx={{ justifyContent: 'space-between', minHeight: { xs: 56, sm: 64 } }}>
           <Box sx={{ display: 'flex', alignItems: 'center' }}>
-            {/* This menu button is always visible on all screen sizes */}
+            {/* Menu button for mobile */}
             <IconButton
               color="inherit"
               aria-label="open drawer"
@@ -231,33 +277,59 @@ const Sidebar = () => {
             >
               <MenuIcon />
             </IconButton>
-            <Typography variant="h6" noWrap>
+            
+            <Typography 
+              variant="h6" 
+              noWrap
+              sx={{
+                fontWeight: 600,
+                fontSize: { xs: '1rem', sm: '1.25rem' }
+              }}
+            >
               Joe Expo Cohort Panel
             </Typography>
           </Box>
           
-          {/* User role badge for top bar */}
-          {userRole && (
-            <Typography 
-              variant="caption" 
-              sx={{ 
-                backgroundColor: userRole === 'admin' ? '#4fc3f7' : '#81c784', 
-                px: 1,
-                py: 0.5,
-                borderRadius: 1,
-                fontWeight: 'bold',
-                textTransform: 'uppercase'
-              }}
-            >
-              {userRole}
-            </Typography>
-          )}
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+            {/* Notification icon */}
+            <Tooltip title="Notifications">
+              <IconButton color="inherit" size="small">
+                <Badge badgeContent={3} color="error">
+                  <Notifications />
+                </Badge>
+              </IconButton>
+            </Tooltip>
+            
+            {/* User icon and role badge */}
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+              {userRole && (
+                <Typography 
+                  variant="caption" 
+                  sx={{ 
+                    backgroundColor: userRole === 'admin' ? '#4fc3f7' : '#81c784', 
+                    px: 1.5,
+                    py: 0.5,
+                    borderRadius: 4,
+                    fontWeight: 'bold',
+                    textTransform: 'uppercase',
+                    fontSize: '0.7rem',
+                    boxShadow: '0 1px 3px rgba(0,0,0,0.1)',
+                    display: { xs: 'none', sm: 'block' }
+                  }}
+                >
+                  {userRole}
+                </Typography>
+              )}
+              <Tooltip title="Account">
+                <IconButton color="inherit" size="small">
+                  <AccountCircle />
+                </IconButton>
+              </Tooltip>
+            </Box>
+          </Box>
         </Toolbar>
       </AppBar>
 
-      {/* Toolbar spacer to push content below AppBar */}
-      <Toolbar />
-      
       {/* Mobile Navigation Drawer */}
       <Drawer
         variant="temporary"
@@ -306,17 +378,18 @@ const Sidebar = () => {
         component="main"
         sx={{
           flexGrow: 1,
-          pt: 3, // Add padding top for spacing below AppBar
-          px: 3, // Add padding on sides
+          width: { xs: '100%', md: `calc(100% - ${sidebarWidth}px)` },
           ml: { xs: 0, md: `${sidebarWidth}px` },
-          transition: theme.transitions.create('margin', {
+          transition: theme.transitions.create(['margin', 'width'], {
             easing: theme.transitions.easing.sharp,
             duration: theme.transitions.duration.enteringScreen,
           }),
         }}
       >
+        <Toolbar /> {/* Space for the AppBar */}
+        {children}
       </Box>
-    </>
+    </Box>
   );
 };
 
