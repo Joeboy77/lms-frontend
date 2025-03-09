@@ -50,6 +50,13 @@ interface QuizScore {
     score: number;
     correctAnswers: number;
     totalQuestions: number;
+    questionDetails?: {
+        question: string;
+        type: 'mcq' | 'fill_in';
+        studentAnswer: string;
+        correctAnswer: string;
+        isCorrect: boolean;
+    }[];
 }
 
 const TakeQuiz = () => {
@@ -469,36 +476,99 @@ const TakeQuiz = () => {
             <Dialog 
                 open={showScore} 
                 onClose={() => navigate('/student/test-quizzes')}
+                maxWidth="md"
+                fullWidth
                 PaperProps={{
-                    sx: { borderRadius: 3, p: 2, maxWidth: '400px' }
+                    sx: { borderRadius: 3, p: 2 }
                 }}
             >
                 <DialogContent>
-                    <Stack alignItems="center" spacing={3}>
-                        <CheckCircleIcon color="success" sx={{ fontSize: 60 }} />
-                        
-                        <Typography variant="h5" fontWeight="bold" textAlign="center">
-                            Quiz Completed!
-                        </Typography>
-                        
-                        <Paper
-                            elevation={0}
-                            sx={{ 
-                                bgcolor: 'primary.light', 
-                                p: 3, 
-                                borderRadius: 3,
-                                width: '100%'
-                            }}
-                        >
-                            <Typography variant="h4" sx={{ color: 'primary.dark', textAlign: 'center', mb: 1 }}>
-                                Score: {quizScore?.correctAnswers}/{quizScore?.totalQuestions}
+                    <Stack spacing={4}>
+                        {/* Score Summary */}
+                        <Stack alignItems="center" spacing={3}>
+                            <CheckCircleIcon color="success" sx={{ fontSize: 60 }} />
+                            
+                            <Typography variant="h5" fontWeight="bold" textAlign="center">
+                                Quiz Completed!
                             </Typography>
                             
-                            <Typography variant="h5" sx={{ color: 'primary.dark', textAlign: 'center' }}>
-                                {quizScore?.score}%
+                            <Paper
+                                elevation={0}
+                                sx={{ 
+                                    bgcolor: 'primary.light', 
+                                    p: 3, 
+                                    borderRadius: 3,
+                                    width: '100%'
+                                }}
+                            >
+                                <Typography variant="h4" sx={{ color: 'primary.dark', textAlign: 'center', mb: 1 }}>
+                                    Score: {quizScore?.correctAnswers}/{quizScore?.totalQuestions}
+                                </Typography>
+                                
+                                <Typography variant="h5" sx={{ color: 'primary.dark', textAlign: 'center' }}>
+                                    {quizScore?.score}%
+                                </Typography>
+                            </Paper>
+                        </Stack>
+
+                        {/* Detailed Feedback */}
+                        <Box>
+                            <Typography variant="h6" gutterBottom sx={{ mb: 2 }}>
+                                Detailed Feedback
                             </Typography>
-                        </Paper>
-                        
+                            <Stack spacing={2}>
+                                {quizScore?.questionDetails?.map((detail, index) => (
+                                    <Paper
+                                        key={index}
+                                        sx={{
+                                            p: 2,
+                                            borderRadius: 2,
+                                            borderLeft: 6,
+                                            borderColor: detail.isCorrect ? 'success.main' : 'error.main',
+                                            bgcolor: detail.isCorrect ? 'success.light' : 'error.light',
+                                            opacity: 0.9
+                                        }}
+                                    >
+                                        <Stack spacing={1}>
+                                            <Typography variant="subtitle1" fontWeight="medium">
+                                                Question {index + 1}: {detail.question}
+                                            </Typography>
+                                            
+                                            <Box sx={{ pl: 2 }}>
+                                                <Typography variant="body2" color="text.secondary">
+                                                    Your Answer: 
+                                                    <Typography 
+                                                        component="span" 
+                                                        sx={{ 
+                                                            ml: 1,
+                                                            color: detail.isCorrect ? 'success.dark' : 'error.dark',
+                                                            fontWeight: 'medium'
+                                                        }}
+                                                    >
+                                                        {detail.studentAnswer || '(No answer provided)'}
+                                                    </Typography>
+                                                </Typography>
+                                                
+                                                <Typography variant="body2" color="text.secondary">
+                                                    Correct Answer: 
+                                                    <Typography 
+                                                        component="span" 
+                                                        sx={{ 
+                                                            ml: 1,
+                                                            color: 'success.dark',
+                                                            fontWeight: 'medium'
+                                                        }}
+                                                    >
+                                                        {detail.correctAnswer}
+                                                    </Typography>
+                                                </Typography>
+                                            </Box>
+                                        </Stack>
+                                    </Paper>
+                                ))}
+                            </Stack>
+                        </Box>
+
                         <Button 
                             fullWidth 
                             variant="contained" 
