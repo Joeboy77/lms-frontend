@@ -165,7 +165,7 @@ const TakeQuiz = () => {
                         setShowWarningDialog(true);
                         
                         if (newWarnings >= MAX_WARNINGS) {
-                            handleSubmit();
+                            handleForcedSubmit();
                             return prev;
                         }
                         return newWarnings;
@@ -228,6 +228,36 @@ const TakeQuiz = () => {
             setScore(response.data.score);
             setSubmitted(true);
             setShowScore(true);
+        } catch (err: any) {
+            setError(err.response?.data?.message || "Failed to submit quiz");
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const handleForcedSubmit = async () => {
+        if (submitted) return;
+        
+        try {
+            setLoading(true);
+            const token = localStorage.getItem("token");
+            const response = await axios.post(
+                `https://lms-backend-cntm.onrender.com/api/student/submit-quiz/${id}`,
+                { 
+                    answers,
+                    forcedSubmission: true
+                },
+                { headers: { Authorization: `Bearer ${token}` }}
+            );
+            
+            setQuizScore(response.data);
+            setScore(response.data.score);
+            setSubmitted(true);
+            setShowScore(true);
+            
+            setTimeout(() => {
+                navigate('/student/test-quizzes');
+            }, 3000);
         } catch (err: any) {
             setError(err.response?.data?.message || "Failed to submit quiz");
         } finally {
@@ -663,7 +693,7 @@ const TakeQuiz = () => {
                         </Typography>
                         {warnings >= MAX_WARNINGS && (
                             <Typography color="error" fontWeight="bold" textAlign="center">
-                                Maximum warnings reached. Quiz will be submitted automatically.
+                                Maximum warnings reached. Quiz will be submitted automatically and you will not be able to retake it.
                             </Typography>
                         )}
                         <Button 
