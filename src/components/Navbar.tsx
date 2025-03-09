@@ -32,11 +32,12 @@ const Navbar = ({ sidebarWidth = 240, collapsed = false }) => {
   const theme = useTheme();
   const navigate = useNavigate();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
-  const [userRole, setUserRole] = useState<string | null>(null);
-  const [userName, setUserName] = useState<string | null>("User");
+  const [mobileOpen, setMobileOpen] = useState(false);
+  const [userRole, setUserRole] = useState<string>('');
+  const [userName, setUserName] = useState<string>('');
+  const [profile, setProfile] = useState<{ profile_picture?: string } | null>(null);
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const [mobileMoreAnchorEl, setMobileMoreAnchorEl] = useState<null | HTMLElement>(null);
-  const [profile, setProfile] = useState<UserProfile | null>(null);
 
   const isMenuOpen = Boolean(anchorEl);
   const isMobileMenuOpen = Boolean(mobileMoreAnchorEl);
@@ -51,7 +52,6 @@ const Navbar = ({ sidebarWidth = 240, collapsed = false }) => {
           setUserName(decoded.name);
         }
 
-        // Fetch profile data if user is a student
         if (decoded.role === 'student') {
           fetchProfile(token);
         }
@@ -86,7 +86,6 @@ const Navbar = ({ sidebarWidth = 240, collapsed = false }) => {
     setMobileMoreAnchorEl(null);
   };
 
-  // Calculate width based on sidebar state
   const actualSidebarWidth = collapsed ? 65 : sidebarWidth;
   
   const menuId = 'primary-account-menu';
