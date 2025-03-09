@@ -30,6 +30,7 @@ import QuizIcon from "@mui/icons-material/Quiz";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import HelpOutlineIcon from "@mui/icons-material/HelpOutline";
+import WarningIcon from '@mui/icons-material/Warning';
 
 interface Question {
     id: number;
@@ -72,6 +73,11 @@ const TakeQuiz = () => {
     const [showScore, setShowScore] = useState(false);
     const [quizScore, setQuizScore] = useState<QuizScore | null>(null);
     const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
+    const [warnings, setWarnings] = useState(0);
+    const [isFullScreen, setIsFullScreen] = useState(false);
+    const MAX_WARNINGS = 3;
+    const [showWarningDialog, setShowWarningDialog] = useState(false);
+    const [warningMessage, setWarningMessage] = useState('');
 
     // Calculate completion percentage
     const getCompletionPercentage = () => {
@@ -148,6 +154,63 @@ const TakeQuiz = () => {
             return () => clearInterval(timer);
         }
     }, [timeLeft, submitted]);
+
+    useEffect(() => {
+        if (!submitted && quiz) {
+            const handleVisibilityChange = () => {
+                if (document.hidden) {
+                    setWarnings(prev => {
+                        const newWarnings = prev + 1;
+                        setWarningMessage(`Warning ${newWarnings}/${MAX_WARNINGS}: Switching tabs or windows is not allowed during the quiz.`);
+                        setShowWarningDialog(true);
+                        
+                        if (newWarnings >= MAX_WARNINGS) {
+                            handleSubmit();
+                            return prev;
+                        }
+                        return newWarnings;
+                    });
+                }
+            };
+
+            const handleFullScreenChange = () => {
+                if (!document.fullscreenElement) {
+                    setWarnings(prev => {
+                        const newWarnings = prev + 1;
+                        setWarningMessage(`Warning ${newWarnings}/${MAX_WARNINGS}: Exiting full-screen mode is not allowed during the quiz.`);
+                        setShowWarningDialog(true);
+
+                        if (newWarnings >= MAX_WARNINGS) {
+                            handleSubmit();
+                            return prev;
+                        }
+                        return newWarnings;
+                    });
+                } else {
+                    setIsFullScreen(true);
+                }
+            };
+
+            // Add event listeners
+            document.addEventListener('visibilitychange', handleVisibilityChange);
+            document.addEventListener('fullscreenchange', handleFullScreenChange);
+
+            // Request full screen on start
+            if (!isFullScreen) {
+                document.documentElement.requestFullscreen().catch(err => {
+                    console.log("Error attempting to enable full-screen mode:", err);
+                });
+            }
+
+            return () => {
+                document.removeEventListener('visibilitychange', handleVisibilityChange);
+                document.removeEventListener('fullscreenchange', handleFullScreenChange);
+                if (document.fullscreenElement) {
+                    document.exitFullscreen();
+                }
+            };
+        }
+    }, [quiz, submitted, isFullScreen]);
 
     const handleSubmit = async () => {
         if (submitted) return;
@@ -576,6 +639,39 @@ const TakeQuiz = () => {
                             onClick={() => navigate('/student/test-quizzes')}
                         >
                             Return to Quizzes
+                        </Button>
+                    </Stack>
+                </DialogContent>
+            </Dialog>
+
+            {/* Warning Dialog */}
+            <Dialog
+                open={showWarningDialog}
+                onClose={() => setShowWarningDialog(false)}
+                PaperProps={{
+                    sx: { borderRadius: 2, p: 2 }
+                }}
+            >
+                <DialogContent>
+                    <Stack spacing={2} alignItems="center">
+                        <WarningIcon color="warning" sx={{ fontSize: 48 }} />
+                        <Typography variant="h6" textAlign="center">
+                            Warning!
+                        </Typography>
+                        <Typography textAlign="center" color="text.secondary">
+                            {warningMessage}
+                        </Typography>
+                        {warnings >= MAX_WARNINGS && (
+                            <Typography color="error" fontWeight="bold" textAlign="center">
+                                Maximum warnings reached. Quiz will be submitted automatically.
+                            </Typography>
+                        )}
+                        <Button 
+                            variant="contained" 
+                            onClick={() => setShowWarningDialog(false)}
+                            sx={{ minWidth: 200 }}
+                        >
+                            {warnings >= MAX_WARNINGS ? 'Close' : 'I Understand'}
                         </Button>
                     </Stack>
                 </DialogContent>
