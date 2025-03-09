@@ -86,6 +86,12 @@ const Navbar = ({ sidebarWidth = 240, collapsed = false }) => {
     setMobileMoreAnchorEl(null);
   };
 
+  const handleProfileClick = () => {
+    if (userRole === 'student') {
+      navigate('/student/profile');
+    }
+  };
+
   const actualSidebarWidth = collapsed ? 65 : sidebarWidth;
   
   const menuId = 'primary-account-menu';
@@ -130,25 +136,30 @@ const Navbar = ({ sidebarWidth = 240, collapsed = false }) => {
         </IconButton>
         <p>Notifications</p>
       </MenuItem>
-      <MenuItem onClick={handleProfileMenuOpen}>
+      <MenuItem onClick={handleProfileClick}>
         <IconButton
           size="large"
           aria-controls={menuId}
           aria-haspopup="true"
           color="inherit"
         >
-          <AccountCircle />
+          <Avatar
+            src={userRole === 'student' ? profile?.profile_picture : undefined}
+            sx={{
+              bgcolor: userRole === 'admin' ? '#4fc3f7' : '#81c784',
+              width: 32,
+              height: 32
+            }}
+          >
+            {userRole === 'admin' ? 'A' : userName?.charAt(0) || 'U'}
+          </Avatar>
         </IconButton>
         <p>Profile</p>
       </MenuItem>
     </Menu>
   );
 
-  const handleProfileClick = () => {
-    if (userRole === 'student') {
-      navigate('/student/profile');
-    }
-  };
+ 
 
   return (
     <AppBar 
