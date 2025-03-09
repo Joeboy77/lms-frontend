@@ -15,7 +15,8 @@ import {
   Toolbar,
   Container,
   Badge,
-  Tooltip
+  Tooltip,
+  Avatar
 } from "@mui/material";
 import { 
   Dashboard, 
@@ -30,6 +31,7 @@ import {
 } from "@mui/icons-material";
 import { NavLink, useNavigate, useLocation } from "react-router-dom";
 import { jwtDecode } from "jwt-decode";
+import axios from "axios";
 
 // Define the sidebar width values
 const EXPANDED_WIDTH = 240;
@@ -41,21 +43,41 @@ const Sidebar = ({ children }: { children: React.ReactNode }) => {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [collapsed, setCollapsed] = useState(false);
   const [userRole, setUserRole] = useState<string | null>(null);
+  const [profile, setProfile] = useState<{ profile_picture?: string } | null>(null);
+  const [userName, setUserName] = useState<string>('');
   const navigate = useNavigate();
   const location = useLocation();
 
   useEffect(() => {
-    // Retrieve token from localStorage
     const token = localStorage.getItem("token");
     if (token) {
       try {
-        const decoded = jwtDecode<{ role: string }>(token);
-        setUserRole(decoded.role); // Extract user role from token
+        const decoded = jwtDecode<{ role: string; name?: string }>(token);
+        setUserRole(decoded.role);
+        if (decoded.name) {
+          setUserName(decoded.name);
+        }
+
+        if (decoded.role === 'student') {
+          fetchProfile(token);
+        }
       } catch (error) {
         console.error("Error decoding token:", error);
       }
     }
   }, []);
+
+  const fetchProfile = async (token: string) => {
+    try {
+      const response = await axios.get(
+        'https://lms-backend-cntm.onrender.com/api/student/profile',
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      setProfile(response.data);
+    } catch (error) {
+      console.error('Error fetching profile:', error);
+    }
+  };
 
   // Close sidebar drawer when route changes on mobile
   useEffect(() => {
@@ -322,7 +344,16 @@ const Sidebar = ({ children }: { children: React.ReactNode }) => {
               )}
               <Tooltip title="Account">
                 <IconButton color="inherit" size="small">
-                  <AccountCircle />
+                  <Avatar
+                    src={userRole === 'student' ? profile?.profile_picture : undefined}
+                    sx={{
+                      bgcolor: userRole === 'admin' ? '#4fc3f7' : '#81c784',
+                      width: 32,
+                      height: 32
+                    }}
+                  >
+                    {userRole === 'admin' ? 'A' : userName?.charAt(0) || 'U'}
+                  </Avatar>
                 </IconButton>
               </Tooltip>
             </Box>
