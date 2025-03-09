@@ -73,6 +73,7 @@ const Sidebar = ({ children }: { children: React.ReactNode }) => {
         'https://lms-backend-cntm.onrender.com/api/student/profile',
         { headers: { Authorization: `Bearer ${token}` } }
       );
+      console.log('Profile data received:', response.data);
       setProfile(response.data);
     } catch (error) {
       console.error('Error fetching profile:', error);
