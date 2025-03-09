@@ -241,6 +241,18 @@ const TakeQuiz = () => {
         try {
             setLoading(true);
             const token = localStorage.getItem("token");
+            
+            // First check if quiz was already submitted
+            const checkResult = await axios.get(
+                `https://lms-backend-cntm.onrender.com/api/student/quiz-result/${id}`,
+                { headers: { Authorization: `Bearer ${token}` }}
+            );
+
+            if (checkResult.data.hasCompleted) {
+                setError("You have already submitted this quiz");
+                return;
+            }
+
             const response = await axios.post(
                 `https://lms-backend-cntm.onrender.com/api/student/submit-quiz/${id}`,
                 { 
@@ -264,7 +276,9 @@ const TakeQuiz = () => {
                 navigate('/student/test-quizzes');
             }, 3000);
         } catch (err: any) {
+            console.error("Error submitting quiz:", err);
             setError(err.response?.data?.message || "Failed to submit quiz");
+            setShowWarningDialog(false);
         } finally {
             setLoading(false);
         }
