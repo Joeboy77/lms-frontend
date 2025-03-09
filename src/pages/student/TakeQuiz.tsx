@@ -255,6 +255,11 @@ const TakeQuiz = () => {
             setSubmitted(true);
             setShowScore(true);
             
+            // Show warning message
+            setWarningMessage("Quiz has been automatically submitted due to multiple warnings.");
+            setShowWarningDialog(true);
+            
+            // Redirect after a delay
             setTimeout(() => {
                 navigate('/student/test-quizzes');
             }, 3000);
